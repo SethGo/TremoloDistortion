@@ -40,7 +40,7 @@ Dist1Component::Dist1Component(TremDistortionAudioProcessor& p)
     // Labels
     float font = 17.0f;
     addAndMakeVisible (sectionHeading);
-    sectionHeading.setText ("DIST 1", juce::dontSendNotification);
+    sectionHeading.setText ("SINE FOLDOVER", juce::dontSendNotification);
     sectionHeading.setLookAndFeel (&customLAF);
     sectionHeading.setJustificationType (juce::Justification::centred);
     sectionHeading.setFont (font);
@@ -52,7 +52,7 @@ Dist1Component::Dist1Component(TremDistortionAudioProcessor& p)
     gainLabel.setFont (font);
     
     addAndMakeVisible (toneLabel);
-    toneLabel.setText ("lpf", juce::dontSendNotification);
+    toneLabel.setText ("fold", juce::dontSendNotification);
     toneLabel.setLookAndFeel (&customLAF);
     toneLabel.setJustificationType (juce::Justification::centred);
     toneLabel.setFont (font);

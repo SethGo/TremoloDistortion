@@ -11,7 +11,7 @@
 
 //==============================================================================
 TremDistortionAudioProcessorEditor::TremDistortionAudioProcessorEditor (TremDistortionAudioProcessor& p)
-    : AudioProcessorEditor (&p), dist1Component (p), dist2Component (p), mixComponent (p), audioProcessor (p)
+    : AudioProcessorEditor (&p), dist1Component (p), dist2Component (p), mixComponent (p), lfoComponent (p), audioProcessor (p)
 {
     addAndMakeVisible (dist1Component);
     addAndMakeVisible (dist2Component);

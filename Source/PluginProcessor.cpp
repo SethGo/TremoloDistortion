@@ -24,10 +24,34 @@ TremDistortionAudioProcessor::TremDistortionAudioProcessor()
                        ), apvts (*this, nullptr, "Parameters", createParameters())
 #endif
 {
+    apvts.addParameterListener ("GAIN1", this);
+    apvts.addParameterListener ("TONE1", this);
+    apvts.addParameterListener ("VOL1", this);
+    
+    apvts.addParameterListener ("GAIN2", this);
+    apvts.addParameterListener ("TONE2", this);
+    apvts.addParameterListener ("VOL2", this);
+    
+    apvts.addParameterListener ("MIX", this);
+    
+    apvts.addParameterListener ("RATE", this);
+    apvts.addParameterListener ("DEPTH", this);
 }
 
 TremDistortionAudioProcessor::~TremDistortionAudioProcessor()
 {
+    apvts.removeParameterListener ("GAIN1", this);
+    apvts.removeParameterListener ("TONE1", this);
+    apvts.removeParameterListener ("VOL1", this);
+    
+    apvts.removeParameterListener ("GAIN2", this);
+    apvts.removeParameterListener ("TONE2", this);
+    apvts.removeParameterListener ("VOL2", this);
+    
+    apvts.removeParameterListener ("MIX", this);
+    
+    apvts.removeParameterListener ("RATE", this);
+    apvts.removeParameterListener ("DEPTH", this);
 }
 
 //==============================================================================
@@ -152,6 +176,8 @@ void TremDistortionAudioProcessor::processBlock (juce::AudioBuffer<float>& buffe
     float mix = getMix();
     getDist1Data(dist1Data);
     getDist2Data(dist2Data);
+    // APVTS listener
+    
     
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
     {
@@ -162,11 +188,12 @@ void TremDistortionAudioProcessor::processBlock (juce::AudioBuffer<float>& buffe
             float signalSplit1 = channelData[sample];
             float signalSplit2 = channelData[sample];
             
-            // Ditortion 1
-            signalSplit1 = std::tanh (signalSplit1 * (dist1Data[0] * 500.00f)) * dist1Data[2];
+            // Ditortion 1, Bounded Sine foldover waveshaper
+            signalSplit1 = std::tanh ((signalSplit1 + ((dist1Data[0] * 10.00f) * (std::sin (signalSplit1 * (dist1Data[1] * 300.0f)))))) * dist1Data[2];
 
-            // Distortion 2
-            signalSplit2 = std::tanh (signalSplit2 * (dist2Data[0] * 500.00f)) * dist2Data[2];
+            // Distortion 2, Tanh waveshaper with LPF pre-filter
+            // (LPF filter)
+            signalSplit2 = std::tanh (signalSplit2 * (dist2Data[0] * 250.00f)) * dist2Data[2];
             
             // Combine each distorted signal
             channelData[sample] = (signalSplit1 * (1 - mix)) + (signalSplit2 * mix);
@@ -210,12 +237,12 @@ juce::AudioProcessorValueTreeState::ParameterLayout TremDistortionAudioProcessor
 {
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;
     
-    params.push_back (std::make_unique<juce::AudioParameterFloat> ("GAIN1", "Gain1", juce::NormalisableRange<float> (0.05f, 1.0f), 1.0f));
-    params.push_back (std::make_unique<juce::AudioParameterFloat> ("TONE1", "Tone1", juce::NormalisableRange<float> (0.00f, 1.0f), 0.50f));
+    params.push_back (std::make_unique<juce::AudioParameterFloat> ("GAIN1", "Gain1", juce::NormalisableRange<float> (0.01f, 1.0f), 0.2f));
+    params.push_back (std::make_unique<juce::AudioParameterFloat> ("TONE1", "Tone1", juce::NormalisableRange<float> (0.01f, 1.0f), 0.50f)); 
     params.push_back (std::make_unique<juce::AudioParameterFloat> ("VOL1", "Vol1", juce::NormalisableRange<float> (0.0f, 1.0f), 0.50f));
     
-    params.push_back (std::make_unique<juce::AudioParameterFloat> ("GAIN2", "Gain2", juce::NormalisableRange<float> (0.05f, 1.0f), 1.0f));
-    params.push_back (std::make_unique<juce::AudioParameterFloat> ("TONE2", "Tone2", juce::NormalisableRange<float> (0.00f, 1.0f), 0.50f));
+    params.push_back (std::make_unique<juce::AudioParameterFloat> ("GAIN2", "Gain2", juce::NormalisableRange<float> (0.01f, 1.0f), 0.6f));
+    params.push_back (std::make_unique<juce::AudioParameterFloat> ("TONE2", "Tone2", juce::NormalisableRange<float> (0.01f, 1.0f), 0.50f));
     params.push_back (std::make_unique<juce::AudioParameterFloat> ("VOL2", "Vol2", juce::NormalisableRange<float> (0.00f, 1.0f), 0.50f));
     
     params.push_back (std::make_unique<juce::AudioParameterFloat> ("MIX", "Mix", 0.00f, 1.00f, 0.50f));
@@ -261,3 +288,5 @@ void TremDistortionAudioProcessor::getDist2Data (float dist2Data[])
     dist2Data[1] = tone2;
     dist2Data[2] = vol2;
 }
+
+

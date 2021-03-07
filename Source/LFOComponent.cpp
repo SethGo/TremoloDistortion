@@ -12,7 +12,8 @@
 #include "LFOComponent.h"
 
 //==============================================================================
-LFOComponent::LFOComponent()
+LFOComponent::LFOComponent (TremDistortionAudioProcessor& p)
+: audioProcessor (p)
 {
     // Labels
     float font = 17.0f;
@@ -40,10 +41,14 @@ LFOComponent::LFOComponent()
     lfoRateSlider.setSliderStyle (juce::Slider::RotaryVerticalDrag);
     lfoRateSlider.setLookAndFeel (&customLAF);
     
+    lfoRateSliderAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "RATE", lfoRateSlider);
+    
     addAndMakeVisible (lfoDepthSlider);
     lfoDepthSlider.setTextBoxStyle (juce::Slider::NoTextBox, true, 0, 0);
     lfoDepthSlider.setSliderStyle (juce::Slider::RotaryVerticalDrag);
     lfoDepthSlider.setLookAndFeel (&customLAF);
+    
+    lfoDepthSliderAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "DEPTH", lfoDepthSlider);
 }
 
 LFOComponent::~LFOComponent()

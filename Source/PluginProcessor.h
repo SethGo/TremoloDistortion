@@ -13,7 +13,10 @@
 //==============================================================================
 /**
 */
-class TremDistortionAudioProcessor  : public juce::AudioProcessor
+class TremDistortionAudioProcessor
+: public juce::AudioProcessor
+, public juce::AudioProcessorValueTreeState::Listener
+
 {
 public:
     //==============================================================================
@@ -62,6 +65,19 @@ public:
 
 private:
     juce::AudioProcessorValueTreeState::ParameterLayout createParameters();
+    
+    bool paramsNeedUpdating { true };
+    int i = 0;
+    
+    void parameterChanged (const juce::String& parameterID, float newValue) override
+    {
+        paramsNeedUpdating = true;
+        std::cout << i << std::endl;
+        i++;
+    }
+    
+    
+    
     
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TremDistortionAudioProcessor)
