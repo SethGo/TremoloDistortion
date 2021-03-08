@@ -28,7 +28,6 @@ TremDistortionAudioProcessorEditor::~TremDistortionAudioProcessorEditor()
 //==============================================================================
 void TremDistortionAudioProcessorEditor::paint (juce::Graphics& g)
 {
-//    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
     g.fillAll (juce::Colour (33, 16, 64));
 }
 

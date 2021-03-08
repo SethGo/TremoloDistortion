@@ -170,14 +170,11 @@ void TremDistortionAudioProcessor::processBlock (juce::AudioBuffer<float>& buffe
     // this code if your algorithm always overwrites all the output channels.
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, numSamples);
-
-    float dist1Data[numSamples];
-    float dist2Data[numSamples];
-    float mix = getMix();
-    getDist1Data(dist1Data);
-    getDist2Data(dist2Data);
-    // APVTS listener
     
+    if (paramsNeedUpdating)
+    {
+        updateParams();
+    }
     
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
     {
@@ -189,11 +186,11 @@ void TremDistortionAudioProcessor::processBlock (juce::AudioBuffer<float>& buffe
             float signalSplit2 = channelData[sample];
             
             // Ditortion 1, Bounded Sine foldover waveshaper
-            signalSplit1 = std::tanh ((signalSplit1 + ((dist1Data[0] * 10.00f) * (std::sin (signalSplit1 * (dist1Data[1] * 300.0f)))))) * dist1Data[2];
+            signalSplit1 = std::tanh ((signalSplit1 + ((distData[0] * 10.00f) * (std::sin (signalSplit1 * (distData[1] * 300.0f)))))) * distData[2];
 
             // Distortion 2, Tanh waveshaper with LPF pre-filter
-            // (LPF filter)
-            signalSplit2 = std::tanh (signalSplit2 * (dist2Data[0] * 250.00f)) * dist2Data[2];
+            // (add LPF filter before tanh)
+            signalSplit2 = std::tanh (signalSplit2 * (distData[3] * 250.00f)) * distData[5];
             
             // Combine each distorted signal
             channelData[sample] = (signalSplit1 * (1 - mix)) + (signalSplit2 * mix);
@@ -253,12 +250,38 @@ juce::AudioProcessorValueTreeState::ParameterLayout TremDistortionAudioProcessor
     return { params.begin(), params.end() };
 }
 
-float TremDistortionAudioProcessor::getMix()
+void TremDistortionAudioProcessor::parameterChanged (const juce::String& parameterID, float newValue)
 {
-    return apvts.getRawParameterValue ("MIX")->load();
+    paramsNeedUpdating = true;
 }
 
-void TremDistortionAudioProcessor::getLfo (float lfoData[])
+void TremDistortionAudioProcessor::updateParams()
+{
+    setDistData();
+    setMix();
+    setLfoData();
+    paramsNeedUpdating = false;
+}
+
+void TremDistortionAudioProcessor::setDistData()
+{
+    float gain1 = apvts.getRawParameterValue ("GAIN1")->load();
+    float tone1 = apvts.getRawParameterValue ("TONE1")->load();
+    float vol1 = apvts.getRawParameterValue ("VOL1")->load();
+    
+    float gain2 = apvts.getRawParameterValue ("GAIN2")->load();
+    float tone2 = apvts.getRawParameterValue ("TONE2")->load();
+    float vol2 = apvts.getRawParameterValue ("VOL2")->load();
+    
+    distData[0] = gain1;
+    distData[1] = tone1;
+    distData[2] = vol1;
+    distData[3] = gain2;
+    distData[4] = tone2;
+    distData[5] = vol2;
+}
+
+void TremDistortionAudioProcessor::setLfoData()
 {
     float rate = apvts.getRawParameterValue ("RATE")->load();
     float depth = apvts.getRawParameterValue ("DEPTH")->load();
@@ -267,26 +290,7 @@ void TremDistortionAudioProcessor::getLfo (float lfoData[])
     lfoData[1] = depth;
 }
 
-void TremDistortionAudioProcessor::getDist1Data (float dist1Data[])
+void TremDistortionAudioProcessor::setMix()
 {
-    float gain1 = apvts.getRawParameterValue ("GAIN1")->load();
-    float tone1 = apvts.getRawParameterValue ("TONE1")->load();
-    float vol1 = apvts.getRawParameterValue ("VOL1")->load();
-    
-    dist1Data[0] = gain1;
-    dist1Data[1] = tone1;
-    dist1Data[2] = vol1;
+    mix = apvts.getRawParameterValue ("MIX")->load();
 }
-
-void TremDistortionAudioProcessor::getDist2Data (float dist2Data[])
-{
-    float gain2 = apvts.getRawParameterValue ("GAIN2")->load();
-    float tone2 = apvts.getRawParameterValue ("TONE2")->load();
-    float vol2 = apvts.getRawParameterValue ("VOL2")->load();
-    
-    dist2Data[0] = gain2;
-    dist2Data[1] = tone2;
-    dist2Data[2] = vol2;
-}
-
-

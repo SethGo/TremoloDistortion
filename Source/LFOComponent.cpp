@@ -77,5 +77,4 @@ void LFOComponent::resized()
     
     lfoRateSlider.setBounds (area.removeFromLeft ((getWidth() - reducedAmount * 2) / 2));
     lfoDepthSlider.setBounds (area);
-    
 }

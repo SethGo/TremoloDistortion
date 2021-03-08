@@ -61,24 +61,24 @@ public:
     void getDist1Data (float dist1Data[]);
     void getDist2Data (float dist2Data[]);
     
+    std::array<float, 2> lfoData;
+    std::array<float, 6> distData;
+    float mix;
+    
+    void updateParams();
+    void setDistData();
+    void setLfoData();
+    void setMix();
+    
     juce::AudioProcessorValueTreeState apvts;
 
 private:
+    
     juce::AudioProcessorValueTreeState::ParameterLayout createParameters();
     
     bool paramsNeedUpdating { true };
-    int i = 0;
-    
-    void parameterChanged (const juce::String& parameterID, float newValue) override
-    {
-        paramsNeedUpdating = true;
-        std::cout << i << std::endl;
-        i++;
-    }
-    
-    
-    
-    
+    void parameterChanged (const juce::String& parameterID, float newValue) override;
+        
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TremDistortionAudioProcessor)
 };

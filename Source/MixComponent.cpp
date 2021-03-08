@@ -15,18 +15,19 @@
 MixComponent::MixComponent(TremDistortionAudioProcessor& p)
 : audioProcessor (p)
 {
+    // Section title
     addAndMakeVisible (mixLabel);
     mixLabel.setText ("MIX", juce::dontSendNotification);
     mixLabel.setJustificationType (juce::Justification::centred);
     mixLabel.setFont (17.0f);
     mixLabel.setLookAndFeel (&customLAF);
     
+    // Slider
     addAndMakeVisible (mixSlider);
     mixSlider.setTextBoxStyle (juce::Slider::NoTextBox, true, 0, 0);
     mixSlider.setLookAndFeel (&customLAF);
     
     mixSliderAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "MIX", mixSlider);
-    
 }
 
 MixComponent::~MixComponent()
@@ -49,5 +50,4 @@ void MixComponent::resized()
     
     mixLabel.setBounds (labelRow);
     mixSlider.setBounds (area);
-
 }
